@@ -74,16 +74,25 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+    
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseRouting();
 
-app.MapControllers();
-app.MapControllerRoute("DefaultApi", "{controller=values}/v{version=apiVersion}/{id?}");
+app.UseCors();
 
 // Swagger
 app.UseSwagger();
@@ -94,6 +103,11 @@ app.UseSwaggerUI(app =>
 });
 var option = new RewriteOptions().AddRedirect("^$", "swagger");
 app.UseRewriter(option);
+
+app.UseAuthorization();
+
+app.MapControllers();
+app.MapControllerRoute("DefaultApi", "{controller=values}/v{version=apiVersion}/{id?}");
 
 app.Run();
 
