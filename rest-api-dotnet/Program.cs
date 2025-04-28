@@ -12,6 +12,15 @@ using RestApiDotNet.HyperMedia.Filters;
 using RestApiDotNet.HyperMedia.Enricher;
 using RestApiDotNet.Hypermedia.Enricher;
 using Microsoft.AspNetCore.Rewrite;
+using RestApiDotNet.Services;
+using RestApiDotNet.Services.Implementations;
+using RestApiDotNet.Model.Repository;
+using RestApiDotNet.Configurations;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +33,15 @@ builder.Services.AddControllers();
 // Dependency Injection
 builder.Services.AddScoped<IPersonBusiness, PersonBusinessImplementation>();
 builder.Services.AddScoped<IBookBusiness, BookBusinessImplementation>();
+builder.Services.AddScoped<ILoginBusiness, LoginBusinessImplementation>();
 
 // Generic repository pattern
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+
+// Authentication
+builder.Services.AddTransient<ITokenService, TokenService>();
 
 var connection = builder.Configuration["MySQLConnection:MySQLConnectionString"];
 
@@ -72,6 +87,40 @@ builder.Services.AddSwaggerGen(c =>
             Url = new Uri("https://github.com/gfabrissouza")
         }
     });
+});
+
+var tokenConfiguration = new TokenConfiguration();
+
+new ConfigureFromConfigurationOptions<TokenConfiguration>(
+    builder.Configuration.GetSection("TokenConfiguration"))
+    .Configure(tokenConfiguration);
+
+builder.Services.AddSingleton(tokenConfiguration);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = tokenConfiguration.Issuer,
+        ValidAudience = tokenConfiguration.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfiguration.Secret)),
+    };
+});
+
+builder.Services.AddAuthorization(auth =>
+{
+    auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser()
+        .Build());
 });
 
 // CORS

@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using RestApiDotNet.Model;
 using RestApiDotNet.Business;
 using RestApiDotNet.HyperMedia.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RestApiDotNet.Controllers
 {
     [ApiVersion("1")]
     [ApiController]
+    [Authorize("Bearer")]
     [Route("api/[controller]/v{version:apiVersion}")]
     public class BookController : ControllerBase
     {

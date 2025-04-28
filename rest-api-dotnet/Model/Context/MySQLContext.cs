@@ -9,6 +9,7 @@ namespace RestApiDotNet.Model.Context
         {
         }
         public DbSet<Person> People { get; set; }
-        public DbSet<Book> Books { get; set; }
+        public DbSet<Book> Books { get; set; }        
+        public DbSet<User> Users { get; set; }
     }
 }

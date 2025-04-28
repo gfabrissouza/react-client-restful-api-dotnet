@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestApiDotNet.Business;
 using RestApiDotNet.Data.VO;
@@ -8,6 +9,7 @@ namespace RestApiDotNet.Controllers
 {
     [ApiVersion("1")]
     [ApiController]
+    [Authorize("Bearer")]
     [Route("api/[controller]/v{version:apiVersion}")]
     public class PersonController : ControllerBase
     {
@@ -39,6 +41,17 @@ namespace RestApiDotNet.Controllers
         {
             var person = _personBusiness.FindByID(id);
             if (person == null) return NotFound();
+            return Ok(person);
+        }
+
+        [HttpPatch("{id}")]
+        [ProducesResponseType(200, Type = typeof(List<PersonVO>))]
+        [ProducesResponseType(400, Type = typeof(List<PersonVO>))]
+        [ProducesResponseType(401, Type = typeof(List<PersonVO>))]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult Patch(long id)
+        {
+            var person = _personBusiness.Disable(id);
             return Ok(person);
         }
 
