@@ -44,6 +44,18 @@ namespace RestApiDotNet.Controllers
             return Ok(person);
         }
 
+        [HttpGet("find-person-by-name")]
+        [ProducesResponseType(200, Type = typeof(List<PersonVO>))]
+        [ProducesResponseType(400, Type = typeof(List<PersonVO>))]
+        [ProducesResponseType(401, Type = typeof(List<PersonVO>))]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult Get([FromQuery] string? firstName, string? lastName)
+        {
+            var person = _personBusiness.FindByName(firstName, lastName);
+            if (person == null) return NotFound();
+            return Ok(person);
+        }
+
         [HttpPatch("{id}")]
         [ProducesResponseType(200, Type = typeof(List<PersonVO>))]
         [ProducesResponseType(400, Type = typeof(List<PersonVO>))]

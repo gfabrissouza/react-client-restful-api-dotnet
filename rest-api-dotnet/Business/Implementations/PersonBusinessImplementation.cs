@@ -24,6 +24,11 @@ namespace RestApiDotNet.Business.Implementations
             return _converter.Parse(_repository.FindByID(id));
         }
 
+        public List<PersonVO> FindByName(string firstName, string lastName)
+        {
+            return _converter.ParseList(_repository.FindByName(firstName, lastName));
+        }
+
         public PersonVO Create(PersonVO person)
         {
             var entity = _converter.Parse(person);
