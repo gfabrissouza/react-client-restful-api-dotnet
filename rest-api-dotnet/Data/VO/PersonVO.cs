@@ -1,6 +1,5 @@
 using RestApiDotNet.Hypermedia.Abstract;
 using RestApiDotNet.HyperMedia;
-using System.Text.Json.Serialization;
 
 namespace RestApiDotNet.Data.VO
 {
@@ -15,6 +14,7 @@ namespace RestApiDotNet.Data.VO
         public string Address { get; set; }
         //[JsonPropertyName("sex")]
         public string Gender { get; set; }
+        public bool Enabled { get; set; }
         public List<HyperMediaLink> Links { get; set; } = new List<HyperMediaLink>();
     }
 }
