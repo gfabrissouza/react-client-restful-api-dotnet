@@ -22,14 +22,14 @@ namespace RestApiDotNet.Controllers
             _personBusiness = personBusiness;
         }
 
-        [HttpGet]
+        [HttpGet("{sortDirection}/{pageSize}/{page}")]
         [ProducesResponseType(200, Type = typeof(PersonVO))]
         [ProducesResponseType(400, Type = typeof(PersonVO))]
         [ProducesResponseType(401, Type = typeof(PersonVO))]
         [TypeFilter(typeof(HyperMediaFilter))]
-        public IActionResult Get()
+        public IActionResult Get([FromQuery] string? name, string sortDirection, int pageSize, int page)
         {
-            return Ok(_personBusiness.FindAll());
+            return Ok(_personBusiness.FindWithPagedSearch(name, sortDirection, pageSize, page));
         }
 
         [HttpGet("{id}")]

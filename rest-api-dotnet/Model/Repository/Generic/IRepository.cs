@@ -9,5 +9,7 @@ namespace RestApiDotNet.Repository
         List<T> FindAll();
         T Update(T entity);
         void Delete(long id);
+        List<T> FindWithPagedSearch(string query);
+        int GetCount(string query);
     }
 }
