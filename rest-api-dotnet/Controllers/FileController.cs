@@ -25,10 +25,25 @@ namespace RestApiDotNet.Controllers
         [ProducesResponseType(400, Type = typeof(FileDetailVO))]
         [ProducesResponseType(401, Type = typeof(FileDetailVO))]
         [Produces("application/json")]
-        public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)
+        public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest file)
         {
-            FileDetailVO detail = await _fileBusiness.SaveFileToDisk(request.File);
+            FileDetailVO detail = await _fileBusiness.SaveFileToDisk(file.File);
             return new OkObjectResult(detail);
+        }
+
+        [HttpPost("upload-files")]
+        [ProducesResponseType(200, Type = typeof(FileDetailVO))]
+        [ProducesResponseType(400, Type = typeof(FileDetailVO))]
+        [ProducesResponseType(401, Type = typeof(FileDetailVO))]
+        [Produces("application/json")]
+        public async Task<List<FileDetailVO>> UploadFiles([FromForm] UploadFilesRequest files)
+        {
+            List<FileDetailVO> list = [];
+            foreach (var file in files.Files)
+            {
+                list.Add(await _fileBusiness.SaveFileToDisk(file));
+            }
+            return list;
         }
     }
 }
