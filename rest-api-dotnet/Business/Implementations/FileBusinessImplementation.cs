@@ -14,7 +14,8 @@ namespace RestApiDotNet.Business.Implementations
         }
         public byte[] GetFile(string fileName)
         {
-            throw new NotImplementedException();
+            var filePath = Path.Combine(_basePath, fileName);
+            return File.ReadAllBytes(filePath);
         }
         public async Task<FileDetailVO> SaveFileToDisk(IFormFile file)
         {
@@ -23,7 +24,7 @@ namespace RestApiDotNet.Business.Implementations
             var fileType = Path.GetExtension(file.FileName);
             var baseUrl = _context.HttpContext.Request.Host;
 
-            if (fileType.ToLower() == "pdf" || fileType.ToLower() == "jpg" || fileType.ToLower() == "png" || fileType.ToLower() == "jpeg")
+            if (fileType.ToLower() == ".pdf" || fileType.ToLower() == ".jpg" || fileType.ToLower() == ".png" || fileType.ToLower() == ".jpeg")
             {
                 var docName = Path.GetFileName(file.FileName);
                 if (file != null && file.Length > 0)

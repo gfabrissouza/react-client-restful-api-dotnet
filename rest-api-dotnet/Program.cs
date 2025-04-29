@@ -107,6 +107,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+    options.Authority = "https://accounts.google.com";
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -147,6 +148,10 @@ app.UseRouting();
 
 app.UseCors();
 
+app.UseAuthentication();
+
+app.UseAuthorization();
+
 // Swagger
 app.UseSwagger();
 app.UseSwaggerUI(app =>
@@ -157,10 +162,11 @@ app.UseSwaggerUI(app =>
 var option = new RewriteOptions().AddRedirect("^$", "swagger");
 app.UseRewriter(option);
 
-app.UseAuthorization();
-
 app.MapControllers();
 app.MapControllerRoute("DefaultApi", "{controller=values}/v{version=apiVersion}/{id?}");
+
+// Test Google Auth Platform
+app.MapGet("/secure-data", [Authorize] () => "Dados protegidos via Google OIDC!");
 
 app.Run();
 

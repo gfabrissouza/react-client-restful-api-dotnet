@@ -20,12 +20,29 @@ namespace RestApiDotNet.Controllers
             _fileBusiness =  fileBusiness;
         }
 
+        [HttpPost("download-file/{filename}")]
+        [ProducesResponseType(200, Type = typeof(byte[]))]
+        [ProducesResponseType(204, Type = typeof(byte[]))]
+        [ProducesResponseType(400, Type = typeof(byte[]))]
+        [Produces("application/octet-stream")]
+        public async Task<IActionResult> GetFileAsync(string fileName)
+        {
+            byte[] buffer = _fileBusiness.GetFile(fileName);
+            if (buffer == null) {
+                HttpContext.Response.ContentType = 
+                    $"application/{Path.GetExtension(fileName).Replace(".", string.Empty)}";
+                HttpContext.Response.Headers.Add("content-length", buffer.Length.ToString());
+                await HttpContext.Response.Body.WriteAsync(buffer, 0, buffer.Length);
+            }
+            return new ContentResult();
+        }
+
         [HttpPost("upload-file")]
         [ProducesResponseType(200, Type = typeof(FileDetailVO))]
         [ProducesResponseType(400, Type = typeof(FileDetailVO))]
         [ProducesResponseType(401, Type = typeof(FileDetailVO))]
         [Produces("application/json")]
-        public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest file)
+        public async Task<IActionResult> UploadFileAsync([FromForm] UploadFileRequest file)
         {
             FileDetailVO detail = await _fileBusiness.SaveFileToDisk(file.File);
             return new OkObjectResult(detail);
@@ -36,7 +53,7 @@ namespace RestApiDotNet.Controllers
         [ProducesResponseType(400, Type = typeof(FileDetailVO))]
         [ProducesResponseType(401, Type = typeof(FileDetailVO))]
         [Produces("application/json")]
-        public async Task<List<FileDetailVO>> UploadFiles([FromForm] UploadFilesRequest files)
+        public async Task<List<FileDetailVO>> UploadFilesAsync([FromForm] UploadFilesRequest files)
         {
             List<FileDetailVO> list = [];
             foreach (var file in files.Files)
