@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,10 +31,13 @@ builder.Services.AddRouting(option => option.LowercaseUrls = true);
 // Add services to the container.
 builder.Services.AddControllers();
 
+builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
 // Dependency Injection
 builder.Services.AddScoped<IPersonBusiness, PersonBusinessImplementation>();
 builder.Services.AddScoped<IBookBusiness, BookBusinessImplementation>();
 builder.Services.AddScoped<ILoginBusiness, LoginBusinessImplementation>();
+builder.Services.AddScoped<IFileBusiness, FileBusinessImplementation>();
 
 // Generic repository pattern
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
