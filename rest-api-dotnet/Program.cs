@@ -11,7 +11,6 @@ using Microsoft.Net.Http.Headers;
 using RestApiDotNet.HyperMedia.Filters;
 using RestApiDotNet.HyperMedia.Enricher;
 using RestApiDotNet.Hypermedia.Enricher;
-using Microsoft.AspNetCore.Rewrite;
 using RestApiDotNet.Services;
 using RestApiDotNet.Services.Implementations;
 using RestApiDotNet.Model.Repository;
@@ -25,6 +24,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Adiciona IHttpClientFactory
+builder.Services.AddHttpClient();
+
 // Lowercase Endpoints
 builder.Services.AddRouting(option => option.LowercaseUrls = true);
 
@@ -32,6 +34,10 @@ builder.Services.AddRouting(option => option.LowercaseUrls = true);
 builder.Services.AddControllers();
 
 builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+// Authentication
+builder.Services.AddTransient<ITokenService, TokenService>();
+builder.Services.AddTransient<IAuthService, GoogleOAuthService>();
 
 // Dependency Injection
 builder.Services.AddScoped<IPersonBusiness, PersonBusinessImplementation>();
@@ -43,9 +49,6 @@ builder.Services.AddScoped<IFileBusiness, FileBusinessImplementation>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
-
-// Authentication
-builder.Services.AddTransient<ITokenService, TokenService>();
 
 var connection = builder.Configuration["MySQLConnection:MySQLConnectionString"];
 
@@ -144,6 +147,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 
+// Servers static files in wwwroot directory
+app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseCors();
@@ -157,16 +163,14 @@ app.UseSwagger();
 app.UseSwaggerUI(app =>
 {
     app.SwaggerEndpoint("/swagger/v1/swagger.json", "Rest API .Net Core v1");
-    app.RoutePrefix = string.Empty;
+    app.RoutePrefix = "swagger";
 });
-var option = new RewriteOptions().AddRedirect("^$", "swagger");
-app.UseRewriter(option);
+
+//var option = new RewriteOptions().AddRedirect("^$", "index.html");
+//app.UseRewriter(option);
 
 app.MapControllers();
 app.MapControllerRoute("DefaultApi", "{controller=values}/v{version=apiVersion}/{id?}");
-
-// Test Google Auth Platform
-app.MapGet("/secure-data", [Authorize] () => "Dados protegidos via Google OIDC!");
 
 app.Run();
 

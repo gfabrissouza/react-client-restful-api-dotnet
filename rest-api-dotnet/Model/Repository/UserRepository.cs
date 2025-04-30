@@ -24,6 +24,11 @@ namespace RestApiDotNet.Model.Repository
             return _context.Users.SingleOrDefault(u => u.UserName == userName);
         }
 
+        public User? GetUserByEmail(string email)
+        {
+            return _context.Users.SingleOrDefault(u => u.Email == email);
+        }
+
         public User? RefreshUserInfo(User user)
         {
             if (!_context.Users.Any(u => u.Id.Equals(user.Id)))

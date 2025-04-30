@@ -8,6 +8,6 @@ namespace RestApiDotNet.Model.Repository
         User? ValidateCredentials(string userName);
         bool RevokeToken(string userName);
         User? RefreshUserInfo(User user);
-
+        User? GetUserByEmail(string email);
     }
 }
