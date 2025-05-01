@@ -1,4 +1,7 @@
 SET NAMES utf8mb4;
+SET character_set_client = utf8mb4;
+SET character_set_connection = utf8mb4;
+SET character_set_results = utf8mb4;
 
 INSERT INTO `user` (`user_name`, `password`, `full_name`, `email`, `refresh_token`, `refresh_token_expiry_time`) VALUES
 ('guilherme', 
