@@ -109,6 +109,7 @@ namespace RestApiDotNet.Business.Implementations
         public TokenVO ValidateUserByEmail(string email)
         {
             var user = _repository.GetUserByEmail(email);
+            if (user == null) return null;
 
             var claims = new List<Claim>
             {
