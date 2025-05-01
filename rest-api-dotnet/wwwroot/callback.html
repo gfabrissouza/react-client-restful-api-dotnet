@@ -10,12 +10,10 @@
 
     <div class="bg-white dark:bg-gray-900 p-10 rounded-2xl shadow-xl max-w-md w-full text-center">
         <div id="profile" class="flex flex-col items-center mb-6">
-            <!-- Avatar, Nome e Email aparecerão aqui -->
         </div>
 
         <p class="mb-2 text-gray-600 dark:text-gray-300 text-sm">Você está logado com sucesso!</p>
 
-        <!-- Tokens -->
         <div id="tokens" class="my-4">
             <div>
                 <h3 class="text-lg font-semibold text-gray-700">ID Token</h3>
@@ -38,12 +36,12 @@
     </div>
 
     <script>
-        // Lê cookies disponíveis no frontend (não HttpOnly)
+        // Read cookies on frontend (not HttpOnly)
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
 
-            if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift()); // decodeURIComponent para corrigir a codificação.
+            if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
         }
 
         const name = getCookie("user_name");
@@ -65,7 +63,6 @@
                     `;
         }
 
-        // Exibe os tokens se disponíveis
         if (idToken) {
             document.getElementById("id_token").innerText = idToken;
         }
@@ -79,14 +76,14 @@
         }
 
         function logout() {
-            // Faz a requisição para revogar o token e limpar cookies no backend
+            // Make the request to revoke the token and clean the cookies on backend
             fetch("/api/auth/v1/revoke", { method: "GET", credentials: "include" })
                 .then(() => {
-                    // Após a revogação, redireciona para a página inicial
+                    // After revoke, call the home page
                     window.location.href = "index.html";
                 })
                 .catch(error => {
-                    console.error("Erro ao tentar fazer logout:", error);
+                    console.error("Logout error:", error);
                 });
         }
     </script>
