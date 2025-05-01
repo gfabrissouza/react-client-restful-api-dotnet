@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RestApiDotNet.Model.Context;
 using RestApiDotNet.Business;
 using RestApiDotNet.Business.Implementations;
@@ -57,10 +57,10 @@ builder.Services.AddDbContext<MySQLContext>(options => options.UseMySql(
     new MySqlServerVersion(new Version(9, 3, 0)))
 );
 
-if (builder.Environment.IsDevelopment())
-{
-    MigrateDatabase(connection);
-}
+//if (builder.Environment.IsDevelopment())
+//{
+//    MigrateDatabase(connection);
+//}
 
 builder.Services.AddMvcCore(options =>
 {
@@ -141,13 +141,34 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader();
     });
 });
-    
+
+// Docker - Certificate to redirect HTTPS (develop environment only)
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+//    options.ListenAnyIP(80);
+
+//    var certPath = "/https-cert.pfx";
+//    var certPassword = "123456";
+
+//    if (File.Exists(certPath))
+//    {
+//        options.ListenAnyIP(44300, listenOptions =>
+//        {
+//            listenOptions.UseHttps(certPath, certPassword);
+//        });
+//    }
+//    else
+//    {
+//        Console.WriteLine($"Certificate not found in: {certPath}, HTTPS disabled!");
+//    }
+//});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 // Servers static files in wwwroot directory
+app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseRouting();

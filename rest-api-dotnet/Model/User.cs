@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RestApiDotNet.Model
 {
-    [Table("User")]
+    [Table("user")]
     public class User
     {
         [Key]

@@ -1,0 +1,36 @@
+services:
+  db:
+    image: rest-api-dotnet-db
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
+    restart: always
+    build:
+      context: .
+      dockerfile: rest-api-dotnet/Database/Dockerfile
+    environment:
+      TZ: ${TZ}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3308:3306"
+    networks:
+      - fabris-network
+  rest-api-dotnet:
+    image: rest-api-dotnet
+    build:
+      context: .
+      dockerfile: rest-api-dotnet/Dockerfile
+    environment:
+      TZ: ${TZ}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_URLS: "http://+:80"
+    ports:
+      - "44300:80"
+    depends_on:
+      - db
+    networks:
+      - fabris-network
+networks:
+  fabris-network:
+    driver: bridge
