@@ -1,57 +1,43 @@
-# --- Pastas de build ---
+# Diretórios e arquivos do Docker
+.env
+*.env
+*.env.*
+
+# Volumes montados (caso estejam em pasta local, embora usemos volumes nomeados)
+volumes/
+data/
+db_data/
+mysql/
+
+# Diretórios e arquivos do .NET
 [Bb]in/
 [Oo]bj/
 artifacts/
-
-# --- Configurações de IDE ---
-.vs/
-.idea/
-*.suo
 *.user
+*.suo
 *.userosscache
 *.sln.docstates
 
-# --- Resultados de Teste e Benchmark ---
-[Tt]est[Rr]esult*/
-BenchmarkDotNet.Artifacts/
-
-# --- Publicação e Deploy ---
-publish/
-.publish/
-*.publishproj
-*.azurePubxml
-PublishScripts/
-
-# --- Cache, temporários e logs ---
+# Logs e temporários
 *.log
 *.tmp
-*.cache
-*.bak
-.localhistory/
-*.pidb
-*.svclog
+*.temp
 
-# --- NuGet (apenas pastas de pacotes baixados) ---
-**/[Pp]ackages/*
-!**/[Pp]ackages/build/
-*.nuget.props
-*.nuget.targets
+# VSCode
+.vscode/
 
-# --- Banco de Dados local (MDF/SQL Server) ---
-*.mdf
-*.ldf
-*.ndf
-
-# --- MacOS e Windows arquivos desnecessários ---
+# Sistema operacional
 .DS_Store
 Thumbs.db
 ehthumbs.db
-$RECYCLE.BIN/
-*.lnk
+desktop.ini
 
-# --- Node.js (caso exista no projeto) ---
+# Node (caso tenha frontend)
 node_modules/
+dist/
+build/
 
-# --- Arquivos auxiliares do projeto ---
-*.http
-.editorconfig
+# Outros
+.idea/
+*.iml
+*.swp
