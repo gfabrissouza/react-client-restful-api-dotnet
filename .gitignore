@@ -17,13 +17,30 @@ artifacts/
 *.suo
 *.userosscache
 *.sln.docstates
+.vs/
+.idea/
+
+# Resultados de Teste e Benchmark
+[Tt]est[Rr]esult*/
+BenchmarkDotNet.Artifacts/
+
+# Publicação e Deploy
+publish/
+.publish/
+*.publishproj
+*.azurePubxml
+PublishScripts/
 
 # Logs e temporários
 *.log
 *.tmp
 *.temp
 
-# VSCode
+# NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
 .vscode/
 
 # Sistema operacional
@@ -32,12 +49,14 @@ Thumbs.db
 ehthumbs.db
 desktop.ini
 
-# Node (caso tenha frontend)
+# Node
 node_modules/
 dist/
 build/
 
 # Outros
+*.http
+.editorconfig
 .idea/
 *.iml
 *.swp
