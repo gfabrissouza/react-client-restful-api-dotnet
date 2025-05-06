@@ -57,10 +57,10 @@ builder.Services.AddDbContext<MySQLContext>(options => options.UseMySql(
     new MySqlServerVersion(new Version(9, 3, 0)))
 );
 
-//if (builder.Environment.IsDevelopment())
-//{
-//    MigrateDatabase(connection);
-//}
+if (builder.Environment.IsDevelopment())
+{
+    MigrateDatabase(connection);
+}
 
 builder.Services.AddMvcCore(options =>
 {
@@ -104,13 +104,13 @@ new ConfigureFromConfigurationOptions<TokenConfiguration>(
 
 builder.Services.AddSingleton(tokenConfiguration);
 
+// Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    options.Authority = "https://accounts.google.com";
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -120,6 +120,19 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = tokenConfiguration.Issuer,
         ValidAudience = tokenConfiguration.Audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfiguration.Secret)),
+    };
+
+    // Reads token from cookie instead Authorization header
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (context.Request.Cookies.TryGetValue("access_token", out var token))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -131,59 +144,37 @@ builder.Services.AddAuthorization(auth =>
         .Build());
 });
 
-// CORS
+// CORS Policy
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
+    options.AddPolicy("FrontendPolicy", builder =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        builder.WithOrigins("http://localhost:5173")
+               .AllowCredentials()
+               .AllowAnyHeader()
+               .AllowAnyMethod();
     });
 });
-
-// Docker - Certificate to redirect HTTPS (develop environment only)
-//builder.WebHost.ConfigureKestrel(options =>
-//{
-//    options.ListenAnyIP(80);
-
-//    var certPath = "/https-cert.pfx";
-//    var certPassword = "123456";
-
-//    if (File.Exists(certPath))
-//    {
-//        options.ListenAnyIP(44300, listenOptions =>
-//        {
-//            listenOptions.UseHttps(certPath, certPassword);
-//        });
-//    }
-//    else
-//    {
-//        Console.WriteLine($"Certificate not found in: {certPath}, HTTPS disabled!");
-//    }
-//});
 
 var app = builder.Build();
 
 //app.UseHttpsRedirection();
 
 // Servers static files in wwwroot directory
-app.UseDefaultFiles();
-app.UseStaticFiles();
+//app.UseDefaultFiles();
+//app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseCors();
-
+app.UseCors("FrontendPolicy");
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 // Swagger
 app.UseSwagger();
 app.UseSwaggerUI(app =>
 {
-    app.SwaggerEndpoint("/swagger/v1/swagger.json", "Rest API .Net Core v1");
+    app.SwaggerEndpoint("/v1/swagger.json", "Rest API .Net Core v1");
     app.RoutePrefix = "swagger";
 });
 
