@@ -1,0 +1,14 @@
+# Use Git Bash or WSL to run the following commands
+mkdir nginx
+cd nginx
+mkdir cert
+cd cert
+
+openssl req \
+ -newkey rsa:4096 -nodes -sha256 -keyout 192.168.1.114.key \
+ -x509 -days 365 -out 192.168.1.114.crt
+
+
+docker run -it --rm --name=nginx -p 80:80 -v "{YOUR WINDOWS PROJECT DIRECTORY}:/data" nginx:1.21 sh
+cp /etc/nginx/* /cfg -R 
+exit
