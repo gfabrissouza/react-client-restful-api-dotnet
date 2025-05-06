@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestApiDotNet.Business;
 using RestApiDotNet.Data.VO;
+using System.Security.Claims;
 
 namespace RestApiDotNet.Controllers
 {
@@ -23,19 +24,74 @@ namespace RestApiDotNet.Controllers
         public IActionResult SingIn([FromBody] UserVO user)
         {
             if (user == null) return BadRequest("Invalid client request");
+
             var token = _loginBusiness.ValidateCredentials(user);
             if (token == null) return Unauthorized();
-            return Ok(token);
+
+            Response.Cookies.Append("access_token", token.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddMinutes(15)
+            });
+
+            Response.Cookies.Append("refresh_token", token.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return NoContent();
         }
 
         [HttpPost]
         [Route("refresh")]
-        public IActionResult Refresh([FromBody] TokenVO tokenVO)
+        public IActionResult Refresh()
         {
-            if (tokenVO == null) return BadRequest("Invalid client request");
+            var accessToken = Request.Cookies["access_token"];
+            if (string.IsNullOrEmpty(accessToken)) return Unauthorized();
+
+            var refreshToken = Request.Cookies["refresh_token"];
+            if (string.IsNullOrEmpty(refreshToken)) return Unauthorized();
+
+            var tokenVO = new TokenVO(true, string.Empty, string.Empty, accessToken, refreshToken);
             var token = _loginBusiness.ValidadeCredentials(tokenVO);
             if (token == null) return Unauthorized();
-            return Ok(token);
+
+            Response.Cookies.Append("access_token", token.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddMinutes(15)
+            });
+
+            return NoContent();
+        }
+
+        [HttpGet("me")]
+        [Authorize("Bearer")]
+        public IActionResult Me()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity == null || !identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            var userClaims = identity.Claims;
+
+            var userInfo = new
+            {
+                Name = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
+                Email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+                Role = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value
+            };
+
+            return Ok(userInfo);
         }
 
         [HttpGet]
@@ -43,10 +99,34 @@ namespace RestApiDotNet.Controllers
         [Authorize("Bearer")]
         public IActionResult Revoke()
         {
-            var userName = User.Identity.Name;
-            var result = _loginBusiness.RevokeToken(userName);
-            if (!result) return BadRequest("Invalid client request");
+            var userName = User.Identity?.Name;
 
+            if (string.IsNullOrEmpty(userName) || !_loginBusiness.RevokeToken(userName))
+            {
+                return BadRequest("Invalid client request");
+            }
+
+            var result = _loginBusiness.RevokeToken(userName);
+            if (!result) return BadRequest("Request failed");
+
+            Response.Cookies.Delete("access_token", new CookieOptions
+            {
+                SameSite = SameSiteMode.None,
+                Secure = true
+            });
+
+            Response.Cookies.Delete("refresh_token", new CookieOptions
+            {
+                SameSite = SameSiteMode.None,
+                Secure = true
+            });
+
+            Response.Cookies.Delete("oauth_state", new CookieOptions
+            {
+                SameSite = SameSiteMode.None,
+                Secure = true
+            });
+            
             return NoContent();
         }
 
@@ -60,7 +140,7 @@ namespace RestApiDotNet.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax,
+                SameSite = SameSiteMode.None,
                 MaxAge = TimeSpan.FromMinutes(10)
             });
 
@@ -78,79 +158,31 @@ namespace RestApiDotNet.Controllers
             }
 
             var auth = await _loginBusiness.ProcessGoogleCallbackAsync(code, state);
+            if (string.IsNullOrEmpty(auth.IdToken)) return Unauthorized("Invalid token");
 
-            if (string.IsNullOrEmpty(auth.IdToken))
-            {
-                return Unauthorized("ID Token não retornado.");
-            }
-
-            // Validar id_token no Google
             var googlePayload = await _loginBusiness.ValidateIdTokenWithGoogle(auth.IdToken);
-            if (googlePayload == null)
-            {
-                return Unauthorized("ID Token inválido.");
-            }
+            if (googlePayload == null) return Unauthorized("The token couldn't be validated");
 
-            var email = googlePayload.Email;
-            var name = googlePayload.Name;
-            var picture = googlePayload.Picture;
+            var token = _loginBusiness.ValidateUserByEmail(googlePayload.Email);
+            if (token == null) return Unauthorized("Usuário inválido.");
 
-            var token = _loginBusiness.ValidateUserByEmail(email);
-            if (token == null)
-            {
-                return Unauthorized("Usuário inválido.");
-            }
-
-            // Store data on cookies to show in callback page
             Response.Cookies.Append("access_token", token.AccessToken, new CookieOptions
             {
-                HttpOnly = false,
+                HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTimeOffset.Parse(token.Expiration)
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
             });
 
             Response.Cookies.Append("refresh_token", token.RefreshToken, new CookieOptions
             {
-                HttpOnly = false,
+                HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax,
+                SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 
-            Response.Cookies.Append("id_token", auth.IdToken, new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = true,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
-            });
-
-            Response.Cookies.Append("user_name", name, new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddHours(1)
-            });
-
-            Response.Cookies.Append("user_email", email, new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddHours(1)
-            });
-
-            Response.Cookies.Append("user_picture", picture, new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddHours(1)
-            });
-
-            return Redirect($"{Request.Scheme}://{Request.Host}/callback.html");
+            return Redirect("http://localhost:5173/callback");
         }
     }
 }
