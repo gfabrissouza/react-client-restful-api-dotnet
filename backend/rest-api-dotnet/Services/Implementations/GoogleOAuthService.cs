@@ -27,7 +27,7 @@ namespace RestApiDotNet.Services.Implementations
                    $"&state={state}";
         }
 
-        public async Task<AuthResponseVO> ProcessGoogleCallbackAsync(string code, string state)
+        public async Task<AuthResponseVO> ProcessGoogleCallbackAsync(string code)
         {
             var http = _httpClientFactory.CreateClient();
             var tokenRequest = new Dictionary<string, string>

@@ -98,9 +98,9 @@ namespace RestApiDotNet.Business.Implementations
             return _authService.GetGoogleLoginUrl(state);
         }
 
-        public Task<AuthResponseVO> ProcessGoogleCallbackAsync(string code, string state)
+        public Task<AuthResponseVO> ProcessGoogleCallbackAsync(string code)
         {
-            return _authService.ProcessGoogleCallbackAsync(code, state);
+            return _authService.ProcessGoogleCallbackAsync(code);
         }
 
         public Task<GoogleIdTokenPayloadVO> ValidateIdTokenWithGoogle(string idToken)

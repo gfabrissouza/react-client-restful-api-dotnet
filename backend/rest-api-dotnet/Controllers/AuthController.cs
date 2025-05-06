@@ -157,7 +157,7 @@ namespace RestApiDotNet.Controllers
                 return Unauthorized("Estado de autenticação inválido.");
             }
 
-            var auth = await _loginBusiness.ProcessGoogleCallbackAsync(code, state);
+            var auth = await _loginBusiness.ProcessGoogleCallbackAsync(code);
             if (string.IsNullOrEmpty(auth.IdToken)) return Unauthorized("Invalid token");
 
             var googlePayload = await _loginBusiness.ValidateIdTokenWithGoogle(auth.IdToken);

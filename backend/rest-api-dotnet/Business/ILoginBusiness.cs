@@ -9,7 +9,7 @@ namespace RestApiDotNet.Business
         bool RevokeToken(string userName);
         TokenVO ValidateUserByEmail(string email);
         string GetGoogleLoginUrl(string state);
-        Task<AuthResponseVO> ProcessGoogleCallbackAsync(string code, string state);
+        Task<AuthResponseVO> ProcessGoogleCallbackAsync(string code);
         Task<GoogleIdTokenPayloadVO> ValidateIdTokenWithGoogle(string idToken);
     }
 }
