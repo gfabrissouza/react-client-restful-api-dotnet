@@ -1,6 +1,6 @@
-# Secure and Scalable RESTful API with .NET, Docker, Azure and React
+# Secure and Scalable RESTful API with .NET, Docker and React
 
-This project demonstrates how to build a professional-grade RESTful API from scratch using ASP.NET Core, with a focus on **security**, **scalability**, and **real-world practices**. It includes integration with a modern React frontend and deployment to **Azure** using Docker and GitHub Actions.
+This project demonstrates how to build a professional-grade RESTful API from scratch using ASP.NET Core, with a focus on security, scalability, and real-world practices. It includes integration with a React frontend and deployment using Docker and GitHub Actions.
 
 ## 📌 Key Features
 
