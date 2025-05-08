@@ -7,10 +7,5 @@
         public string Secret { get; set; }
         public int Minutes { get; set; }
         public int DayToExpire { get; set; }
-        public string GoogleClientId { get; set; }
-        public string GoogleClientSecret { get; set; }
-        public string RedirectUri { get; set; }
-        public string GoogleAuthorizationEndpoint { get; set; }
-        public string GoogleValidateTokenEndpoint { get; set; }
     }
 }

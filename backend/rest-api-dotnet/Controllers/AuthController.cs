@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestApiDotNet.Business;
+using RestApiDotNet.Configurations;
 using RestApiDotNet.Data.VO;
 using System.Security.Claims;
 
@@ -13,10 +14,12 @@ namespace RestApiDotNet.Controllers
     public class AuthController : ControllerBase
     {
         private ILoginBusiness _loginBusiness;
+        private readonly AuthConfiguration _configuration;
 
-        public AuthController(ILoginBusiness loginBusiness)
+        public AuthController(AuthConfiguration configuration, ILoginBusiness loginBusiness)
         {
             _loginBusiness = loginBusiness;
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -182,7 +185,7 @@ namespace RestApiDotNet.Controllers
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 
-            return Redirect("http://localhost:5173/callback");
+            return Redirect(_configuration.FrontendRedirectUrl);
         }
     }
 }

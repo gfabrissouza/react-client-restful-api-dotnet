@@ -57,10 +57,10 @@ builder.Services.AddDbContext<MySQLContext>(options => options.UseMySql(
     new MySqlServerVersion(new Version(9, 3, 0)))
 );
 
-if (builder.Environment.IsDevelopment())
-{
-    MigrateDatabase(connection);
-}
+//if (builder.Environment.IsDevelopment())
+//{
+//    MigrateDatabase(connection);
+//}
 
 builder.Services.AddMvcCore(options =>
 {
@@ -95,6 +95,24 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+// Get configurations from appsettings.json
+var allowedOrigins = builder.Configuration
+    .GetSection("CorsConfiguration:AllowedOrigins")
+    .Get<string[]>();
+
+if (allowedOrigins is null || allowedOrigins.Length == 0)
+{
+    throw new InvalidOperationException("CORS origins not configured.");
+}
+
+var authConfiguration = new AuthConfiguration();
+
+new ConfigureFromConfigurationOptions<AuthConfiguration>(
+    builder.Configuration.GetSection("AuthConfiguration"))
+    .Configure(authConfiguration);
+
+builder.Services.AddSingleton(authConfiguration);
 
 var tokenConfiguration = new TokenConfiguration();
 
@@ -149,7 +167,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", builder =>
     {
-        builder.WithOrigins("http://localhost:5173")
+        builder.WithOrigins(allowedOrigins)
                .AllowCredentials()
                .AllowAnyHeader()
                .AllowAnyMethod();
@@ -174,7 +192,7 @@ app.UseAuthorization();
 app.UseSwagger();
 app.UseSwaggerUI(app =>
 {
-    app.SwaggerEndpoint("/v1/swagger.json", "Rest API .Net Core v1");
+    app.SwaggerEndpoint("v1/swagger.json", "Rest API .Net Core v1");
     app.RoutePrefix = "swagger";
 });
 
