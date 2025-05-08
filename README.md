@@ -1,19 +1,18 @@
-# Secure and Scalable RESTful API with .NET, Docker, Azure and React
+# RESTful API with .NET, Docker and React
 
-This project demonstrates how to build a professional-grade RESTful API from scratch using ASP.NET Core, with a focus on **security**, **scalability**, and **real-world practices**. It includes integration with a modern React frontend and deployment to **Azure** using Docker and GitHub Actions.
+This project demonstrates how to build a professional-grade RESTful API from scratch using ASP.NET Core, with a focus on security, scalability, and real-world practices. It includes integration with a React frontend and deployment using Docker and GitHub Actions.
 
 ## 📌 Key Features
 
 - ✅ Fully RESTful API with resource-based routes
 - ✅ JWT authentication with access and refresh tokens via **HttpOnly Cookies**
-- ✅ Secure OAuth login (e.g., Google) using Authorization Code + PKCE flow
+- ✅ Secure OAuth login (e.g., Google) using Authorization Code
 - ✅ Versioning, Pagination, File Upload & Download support
 - ✅ **HATEOAS** implementation to enrich responses
 - ✅ Swagger (OpenAPI) documentation
 - ✅ Clean Architecture with Business, Repository, and Controller layers
 - ✅ Docker and Docker Compose for local development
 - ✅ Secure HTTPS with NGINX reverse proxy
-- ✅ Deployed to **Azure** (App Service + Azure Database + Container Registry)
 - ✅ Continuous Integration and Deployment using GitHub Actions
 
 ---
@@ -24,7 +23,7 @@ This project demonstrates how to build a professional-grade RESTful API from scr
 |---------------------------|-----------------------------------------------------------------------------|
 | Access Token              | Stored in HttpOnly, Secure Cookie with short expiration (~15 min)          |
 | Refresh Token             | Stored in HttpOnly, Secure Cookie with long expiration (~7 days)           |
-| Authentication Flow       | OAuth 2.0 Authorization Code with PKCE                                     |
+| Authentication Flow       | OAuth 2.0 Authorization                                                    |
 | Token Refresh             | Done via `/refresh` endpoint using cookie, without exposing new token      |
 | Session Info              | Retrieved via `/me` endpoint (protected by `Authorize`)                    |
 | CORS                      | Configured to allow cross-origin requests with `withCredentials`           |
