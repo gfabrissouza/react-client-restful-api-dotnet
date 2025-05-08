@@ -18,16 +18,9 @@ interface Book {
 export default function Books(){
 
     const [books, setBooks] = useState<Book[]>([]);
-    const[page, setPage] = useState(0);
+    //const[page, setPage] = useState(0);
 
     const username = localStorage.getItem('userName');
-    //const accessToken = localStorage.getItem('accessToken');
-
-    // const authorization = {
-    //     headers: {
-    //         Authorization: `Bearer ${accessToken}`
-    //     }
-    // }
 
     const navigate = useNavigate();
 
@@ -38,7 +31,7 @@ export default function Books(){
     async function fetchMoreBooks(){
         const response = await api.get('/api/book/v1');
         setBooks(books => [...books, ...response.data]);
-        setPage(page => page + 1);
+        //setPage(page => page + 1);
     };
 
     async function logout(){

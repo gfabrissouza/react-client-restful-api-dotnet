@@ -16,7 +16,7 @@ export default function Login() {
     const { setAuthenticated } = useAuth();
 
     async function login(event: React.FormEvent) {
-        event.preventDefault(); // evita o reload
+        event.preventDefault(); // avoid page reload
 
         const data = {
             username: username,
@@ -24,16 +24,12 @@ export default function Login() {
         };
         
         try {
-            //const response = await api.post('/api/auth/v1/signin', data);
-
             await api.post('/api/auth/v1/signin', data);
 
             const userResponse = await api.get('/api/auth/v1/me');
 
             const userName = userResponse.data.name;
             localStorage.setItem('userName', userName);
-            //localStorage.setItem('accessToken', response.data.accessToken);
-            //localStorage.setItem('refreshToken', response.data.refreshToken);
 
             setAuthenticated(true);
             navigate('/books');
@@ -44,7 +40,7 @@ export default function Login() {
 
     async function googleAuthentication(){
         try {
-            window.location.href = 'https://localhost:443/api/auth/v1/start'; //`${baseURL}/api/auth/v1/start`;
+            window.location.href = `${baseURL}/api/auth/v1/start`;
         } catch (error) {
             alert('Google authentication failed!');
         }

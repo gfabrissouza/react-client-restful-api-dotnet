@@ -2,10 +2,10 @@ import { getLogoutCallback } from '../context/AuthContext';
 
 import axios from 'axios'
 
-export const baseURL = 'https://localhost:443';
+export const baseURL = 'https://fabris-api-server.azurewebsites.net'; //'https://localhost:443';
 
 const api = axios.create({
-    baseURL: 'https://localhost:443',
+    baseURL: baseURL,
     withCredentials: true
 })
 
@@ -14,7 +14,7 @@ api.interceptors.response.use(
     error => {
         if (error.response && error.response.status === 401) {
             const logout = getLogoutCallback();
-            if (logout) logout(); // chama o logout do contexto
+            if (logout) logout(); // call logout using context
         }
         return Promise.reject(error);
     }

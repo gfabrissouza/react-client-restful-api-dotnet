@@ -9,14 +9,6 @@ import { FiArrowLeft } from 'react-icons/fi';
 
 export default function Book(){
 
-    //const accessToken = localStorage.getItem('accessToken');
-
-    // const authorization = {
-    //     headers: {
-    //         Authorization: `Bearer ${accessToken}`
-    //     }
-    // }
-
     const [id, setId] = useState(0);
     const [author, setAuthor] = useState('');
     const [title, setTitle] = useState('');
@@ -50,7 +42,7 @@ export default function Book(){
     }
 
     async function saveOrUpdateBook(event: React.FormEvent){
-        event.preventDefault(); // evita o reload
+        event.preventDefault(); // avoid page reload
 
         const data = {
             id: id,
