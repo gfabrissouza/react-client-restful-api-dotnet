@@ -11,10 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\callback.html" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.0" />
     <PackageReference Include="Evolve" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.15" />
@@ -32,8 +28,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\callback.html" />
-    <None Include="wwwroot\index.html" />
+    <None Remove="wwwroot\callback.html" />
+    <None Remove="wwwroot\index.html" />
   </ItemGroup>
 
 </Project>
