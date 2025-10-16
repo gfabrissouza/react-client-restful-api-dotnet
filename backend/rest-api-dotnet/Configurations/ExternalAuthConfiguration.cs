@@ -1,6 +1,6 @@
 ﻿namespace RestApiDotNet.Configurations
 {
-    public class AuthConfiguration
+    public class ExternalAuthConfiguration
     {
         public string GoogleClientId { get; set; }
         public string GoogleClientSecret { get; set; }

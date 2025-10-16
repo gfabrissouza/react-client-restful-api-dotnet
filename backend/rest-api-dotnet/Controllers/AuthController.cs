@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestApiDotNet.Business;
-using RestApiDotNet.Configurations;
 using RestApiDotNet.Data.VO;
 using System.Security.Claims;
 
@@ -14,16 +13,14 @@ namespace RestApiDotNet.Controllers
     public class AuthController : ControllerBase
     {
         private ILoginBusiness _loginBusiness;
-        private readonly AuthConfiguration _configuration;
 
-        public AuthController(AuthConfiguration configuration, ILoginBusiness loginBusiness)
+        public AuthController(ILoginBusiness loginBusiness)
         {
             _loginBusiness = loginBusiness;
-            _configuration = configuration;
         }
 
         [HttpPost]
-        [Route("signin")]
+        [Route("[action]")]
         public IActionResult SingIn([FromBody] UserVO user)
         {
             if (user == null) return BadRequest("Invalid client request");
@@ -51,7 +48,7 @@ namespace RestApiDotNet.Controllers
         }
 
         [HttpPost]
-        [Route("refresh")]
+        [Route("[action]")]
         public IActionResult Refresh()
         {
             var accessToken = Request.Cookies["access_token"];
@@ -75,30 +72,8 @@ namespace RestApiDotNet.Controllers
             return NoContent();
         }
 
-        [HttpGet("me")]
-        [Authorize("Bearer")]
-        public IActionResult Me()
-        {
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
-            if (identity == null || !identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
-
-            var userClaims = identity.Claims;
-
-            var userInfo = new
-            {
-                Name = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
-                Email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
-                Role = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value
-            };
-
-            return Ok(userInfo);
-        }
-
         [HttpGet]
-        [Route("revoke")]
+        [Route("[action]")]
         [Authorize("Bearer")]
         public IActionResult Revoke()
         {
@@ -133,59 +108,26 @@ namespace RestApiDotNet.Controllers
             return NoContent();
         }
 
-        [HttpGet]
-        [Route("start")]
-        public IActionResult StartLogin()
+        [HttpGet("[action]")]
+        [Authorize("Bearer")]
+        public IActionResult Me()
         {
-            var state = Guid.NewGuid().ToString("N");
-
-            Response.Cookies.Append("oauth_state", state, new CookieOptions
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity == null || !identity.IsAuthenticated)
             {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                MaxAge = TimeSpan.FromMinutes(10)
-            });
-
-            return Redirect(_loginBusiness.GetGoogleLoginUrl(state));
-        }
-
-        [HttpGet]
-        [Route("callback")]
-        public async Task<IActionResult> CallbackAsync([FromQuery] string code, string state)
-        {
-            var expectedState = Request.Cookies["oauth_state"];
-            if (state != expectedState)
-            {
-                return Unauthorized("Estado de autenticação inválido.");
+                return Unauthorized();
             }
 
-            var auth = await _loginBusiness.ProcessGoogleCallbackAsync(code);
-            if (string.IsNullOrEmpty(auth.IdToken)) return Unauthorized("Invalid token");
+            var userClaims = identity.Claims;
 
-            var googlePayload = await _loginBusiness.ValidateIdTokenWithGoogle(auth.IdToken);
-            if (googlePayload == null) return Unauthorized("The token couldn't be validated");
-
-            var token = _loginBusiness.ValidateUserByEmail(googlePayload.Email);
-            if (token == null) return Unauthorized("Usuário inválido.");
-
-            Response.Cookies.Append("access_token", token.AccessToken, new CookieOptions
+            var userInfo = new
             {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
-            });
+                Name = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
+                Email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+                Role = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value
+            };
 
-            Response.Cookies.Append("refresh_token", token.RefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
-            });
-
-            return Redirect(_configuration.FrontendRedirectUrl);
+            return Ok(userInfo);
         }
     }
 }
