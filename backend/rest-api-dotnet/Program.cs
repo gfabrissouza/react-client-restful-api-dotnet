@@ -24,7 +24,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adiciona IHttpClientFactory
+// Add IHttpClientFactory
 builder.Services.AddHttpClient();
 
 // Lowercase Endpoints
@@ -106,13 +106,13 @@ if (allowedOrigins is null || allowedOrigins.Length == 0)
     throw new InvalidOperationException("CORS origins not configured.");
 }
 
-var authConfiguration = new AuthConfiguration();
+var externalAuthConfiguration = new ExternalAuthConfiguration();
 
-new ConfigureFromConfigurationOptions<AuthConfiguration>(
+new ConfigureFromConfigurationOptions<ExternalAuthConfiguration>(
     builder.Configuration.GetSection("AuthConfiguration"))
-    .Configure(authConfiguration);
+    .Configure(externalAuthConfiguration);
 
-builder.Services.AddSingleton(authConfiguration);
+builder.Services.AddSingleton(externalAuthConfiguration);
 
 var tokenConfiguration = new TokenConfiguration();
 
@@ -176,12 +176,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-//app.UseHttpsRedirection();
-
-// Servers static files in wwwroot directory
-//app.UseDefaultFiles();
-//app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseCors("FrontendPolicy");
@@ -195,9 +189,6 @@ app.UseSwaggerUI(app =>
     app.SwaggerEndpoint("v1/swagger.json", "Rest API .Net Core v1");
     app.RoutePrefix = "swagger";
 });
-
-//var option = new RewriteOptions().AddRedirect("^$", "index.html");
-//app.UseRewriter(option);
 
 app.MapControllers();
 app.MapControllerRoute("DefaultApi", "{controller=values}/v{version=apiVersion}/{id?}");
