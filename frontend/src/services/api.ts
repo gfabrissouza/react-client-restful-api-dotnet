@@ -2,7 +2,7 @@ import { getLogoutCallback } from '../context/AuthContext';
 
 import axios from 'axios'
 
-export const baseURL = 'https://fabris-api-server.azurewebsites.net'; //'https://localhost:443';
+export const baseURL = 'https://localhost:443';
 
 const api = axios.create({
     baseURL: baseURL,
@@ -29,6 +29,15 @@ export async function refreshAccessToken(): Promise<boolean> {
         const logout = getLogoutCallback();
         if (logout) logout(); // automatic fallback
         return false;
+    }
+}
+
+export async function handleLogin() {
+    try {
+        const response = await api.get('/api/auth/v1/me');
+        console.log(response);
+    } catch (error) {
+        console.log(error);
     }
 }
 

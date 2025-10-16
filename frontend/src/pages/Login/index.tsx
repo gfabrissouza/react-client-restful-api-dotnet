@@ -40,7 +40,7 @@ export default function Login() {
 
     async function googleAuthentication(){
         try {
-            window.location.href = `${baseURL}/api/auth/v1/start`;
+            window.location.href = `${baseURL}/api/externalauth/v1/singin`;
         } catch (error) {
             alert('Google authentication failed!');
         }

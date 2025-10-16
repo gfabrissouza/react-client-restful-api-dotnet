@@ -18,7 +18,6 @@ interface Book {
 export default function Books(){
 
     const [books, setBooks] = useState<Book[]>([]);
-    //const[page, setPage] = useState(0);
 
     const username = localStorage.getItem('userName');
 
@@ -31,7 +30,6 @@ export default function Books(){
     async function fetchMoreBooks(){
         const response = await api.get('/api/book/v1');
         setBooks(books => [...books, ...response.data]);
-        //setPage(page => page + 1);
     };
 
     async function logout(){

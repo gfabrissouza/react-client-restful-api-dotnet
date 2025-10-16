@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { refreshAccessToken } from '../services/api';
+import { handleLogin, refreshAccessToken } from '../services/api';
 
 interface AuthContextData {
     isAuthenticated: boolean;
@@ -23,15 +23,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => clearInterval(intervalId);
     }, [isAuthenticated]);
 
+    useEffect(() => {
+        handleLogin();
+        if (!logoutCallback) {
+            registerLogoutCallback(logout);
+        }
+    }, []);
+
     const logout = () => {
         localStorage.clear(); 
         setIsAuthenticated(false);
-        window.location.href = '/';
     };
-
-    useEffect(() => {
-        registerLogoutCallback(logout);
-    }, []);
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, setAuthenticated: setIsAuthenticated, logout }}>
@@ -40,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 }
 
-export function registerLogoutCallback(cb: () => void) {
+function registerLogoutCallback(cb: () => void) {
     logoutCallback = cb;
 }
 
