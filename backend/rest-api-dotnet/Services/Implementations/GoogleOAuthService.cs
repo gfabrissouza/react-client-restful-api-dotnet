@@ -7,12 +7,12 @@ namespace RestApiDotNet.Services.Implementations
 {
     public class GoogleOAuthService : IAuthService
     {
-        private AuthConfiguration _configuration;
+        private ExternalAuthConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public GoogleOAuthService(AuthConfiguration configuration, IHttpClientFactory factory)
+        public GoogleOAuthService(ExternalAuthConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
-            _httpClientFactory = factory;
+            _httpClientFactory = httpClientFactory;
             _configuration = configuration;
         }
 
