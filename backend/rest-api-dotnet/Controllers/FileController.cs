@@ -20,7 +20,7 @@ namespace RestApiDotNet.Controllers
             _fileBusiness =  fileBusiness;
         }
 
-        [HttpPost("download-file/{filename}")]
+        [HttpGet("download-file/{filename}")]
         [ProducesResponseType(200, Type = typeof(byte[]))]
         [ProducesResponseType(204, Type = typeof(byte[]))]
         [ProducesResponseType(400, Type = typeof(byte[]))]
@@ -28,8 +28,9 @@ namespace RestApiDotNet.Controllers
         public async Task<IActionResult> GetFileAsync(string fileName)
         {
             byte[] buffer = _fileBusiness.GetFile(fileName);
-            if (buffer == null) {
-                HttpContext.Response.ContentType = 
+            if (buffer != null)
+            {
+                HttpContext.Response.ContentType =
                     $"application/{Path.GetExtension(fileName).Replace(".", string.Empty)}";
                 HttpContext.Response.Headers.Add("content-length", buffer.Length.ToString());
                 await HttpContext.Response.Body.WriteAsync(buffer, 0, buffer.Length);
